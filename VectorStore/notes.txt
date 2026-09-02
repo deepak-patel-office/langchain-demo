@@ -1,98 +1,124 @@
+================================================================================
+VECTOR STORE — NOTES
+================================================================================
+
 Vector Store kya hota hai?
+  Wo system jo data ko embeddings (numerical vectors) ki form me store karta hai,
+  phir query aane par similar vectors dhoondh ke relevant data return karta hai.
 
-# vector store wo system hai jo data ko embeddings (numerical vectors) ki form me store karta hai
-# phir query aane par similar vectors dhoondh ke relevant data return karta hai
-
-# flow simple hai:
-# 1. documents / text / images -> embeddings
-# 2. embeddings vector store me save
-# 3. query aayi -> query ka bhi embedding banao
-# 4. similar vectors search karke relevant docs nikaalo
+Flow:
+  1) documents / text / images → embeddings
+  2) embeddings vector store me save
+  3) query aayi → query ka bhi embedding banao
+  4) similar vectors search karke relevant docs nikaalo
 
 
-Key features:
+================================================================================
+KEY FEATURES
+================================================================================
 
 1) Storage
-# vectors + unka metadata store hota hai
-# in-memory (RAM) -> fast, lekin process band hua to data gayab (persist alag se karna padta hai)
-# on-disk (SSD/HDD) -> durable, bade data ke liye better
-# on-disk ko ROM mat samajhna. ROM read-only memory hai, disk persistent storage hai
+  Vectors + unka metadata store hota hai.
+  - in-memory (RAM) → fast, lekin process band hua to data gayab
+    (persist alag se karna padta hai)
+  - on-disk (SSD/HDD) → durable, bade data ke liye better
+  Note: on-disk ko ROM mat samajhna.
+        ROM = read-only memory, disk = persistent storage.
 
 2) Similarity Search
-# query vector ke sabse similar vectors retrieve karta hai
-# common metrics: cosine similarity, Euclidean distance, inner product (dot product)
+  Query vector ke sabse similar vectors retrieve karta hai.
+  Common metrics:
+    - cosine similarity
+    - Euclidean distance
+    - inner product (dot product)
 
 3) Indexing
-# high-dimensional vectors par fast search ke liye index banata hai
-# exact nearest neighbor har baar feasible nahi (bahut slow)
-# isliye aksar Approximate Nearest Neighbor (ANN) use hota hai
-# thoda accuracy trade-off, speed bahut zyada
+  High-dimensional vectors par fast search ke liye index banata hai.
+  Exact nearest neighbor har baar feasible nahi (bahut slow).
+  Isliye aksar Approximate Nearest Neighbor (ANN) use hota hai:
+    thoda accuracy trade-off, speed bahut zyada.
 
 4) CRUD
-# Create -> naye vectors add
-# Read -> vectors / similar results nikaalna
-# Update -> existing entry update
-# Delete -> outdated vectors hataana
+  Create → naye vectors add
+  Read   → vectors / similar results nikaalna
+  Update → existing entry update
+  Delete → outdated vectors hataana
 
 
-Use-cases:
-1) Semantic Search  -> keyword nahi, meaning ke hisaab se search
-2) RAG              -> LLM ko relevant context dena
-3) Recommender      -> similar items / users suggest karna
-4) Image/Multimedia -> embeddings se similar media dhoondhna
+================================================================================
+USE-CASES
+================================================================================
+
+1) Semantic Search   → keyword nahi, meaning ke hisaab se search
+2) RAG               → LLM ko relevant context dena
+3) Recommender       → similar items / users suggest karna
+4) Image/Multimedia  → embeddings se similar media dhoondhna
 
 
+================================================================================
+VECTOR STORE vs VECTOR DATABASE
+================================================================================
 
-Vector Store vs Vector Database
-
-# dono related hain, same cheez nahi
+Dono related hain, same cheez nahi.
 
 Vector Store:
-# lightweight library/service
-# kaam: embeddings store + similarity search
-# traditional DB features aksar nahi: transactions, rich query language, RBAC, replication etc.
-# prototyping / small apps ke liye achha
-# example: FAISS
-# FAISS search deta hai, lekin persistence, scaling, auth, backup alag se handle karna padta hai
+  Lightweight library/service.
+  Kaam: embeddings store + similarity search.
+  Traditional DB features aksar nahi:
+    transactions, rich query language, RBAC, replication etc.
+  Prototyping / small apps ke liye achha.
+  Example: FAISS
+    → search deta hai, lekin persistence, scaling, auth, backup
+      alag se handle karna padta hai.
 
 Vector Database:
-# full database jo vectors store + query ke liye bani hai
-# extra features:
-#   - horizontal scaling
-#   - durability / persistence (replication, backup)
-#   - metadata filters
-#   - ACID / near-ACID (product pe depend)
-#   - auth / security
-# production + large datasets ke liye
+  Full database jo vectors store + query ke liye bani hai.
+  Extra features:
+    - horizontal scaling
+    - durability / persistence (replication, backup)
+    - metadata filters
+    - ACID / near-ACID (product pe depend)
+    - auth / security
+  Production + large datasets ke liye.
+  Examples: Pinecone, Qdrant, Weaviate, Chroma
+  Note: Chroma ko vector DB bhi kaha jata hai,
+        local/dev use bhi common hai.
 
-# simple:
-# vector database = vector store + extra DB features (scaling, security, filtering, durability)
-
-# examples: Pinecone, Qdrant, Weaviate, Chroma
-# Chroma ko vector DB bhi kaha jata hai, local/dev use bhi common hai
-
-
-
-LangChain me Vector Store
-
-# LangChain kai stores ke saath integrate karta hai: FAISS, Pinecone, Chroma, Qdrant, Weaviate etc.
-# scale / features / deployment ke hisaab se backend choose kar sakte ho
-
-# common interface:
-# LangChain ek uniform VectorStore API deta hai
-# matlab koi si bhi store use karo, pattern almost same rehta hai
-# FAISS se Pinecone switch relatively kam code change se ho sakta hai
-# exact config thoda alag ho sakta hai, methods same type ke: add_documents, similarity_search, as_retriever
-
-# metadata:
-# har document ke saath metadata attach kar sakte ho (source, author, timestamp, doc type)
-# isse filter-based retrieval possible hai
-# e.g. sirf source="pdf" wale docs search karo
-
-# short:
-# LangChain app aur different vector stores ke beech common layer hai
-# store, search, filter, backend switch easier
+Simple:
+  vector database = vector store + extra DB features
+  (scaling, security, filtering, durability)
 
 
-# Vector store se related notes and saare code below google colab me hai:
-# https://colab.research.google.com/drive/18ZxB7eih7zOtt-tj0AaCako3hVcGLe1c
+================================================================================
+LANGCHAIN ME VECTOR STORE
+================================================================================
+
+LangChain kai stores ke saath integrate karta hai:
+  FAISS, Pinecone, Chroma, Qdrant, Weaviate etc.
+
+Scale / features / deployment ke hisaab se backend choose kar sakte ho.
+
+Common interface:
+  LangChain ek uniform VectorStore API deta hai.
+  Matlab koi si bhi store use karo, pattern almost same rehta hai.
+  FAISS se Pinecone switch relatively kam code change se ho sakta hai.
+  Exact config thoda alag ho sakta hai, methods same type ke:
+    add_documents, similarity_search, as_retriever
+
+Metadata:
+  Har document ke saath metadata attach kar sakte ho
+  (source, author, timestamp, doc type).
+  Isse filter-based retrieval possible hai.
+  Example: sirf source="pdf" wale docs search karo.
+
+Short:
+  LangChain app aur different vector stores ke beech common layer hai.
+  Store, search, filter, backend switch easier.
+
+
+================================================================================
+RELATED CODE / COLAB
+================================================================================
+
+Vector store se related notes aur saara code:
+  https://colab.research.google.com/drive/18ZxB7eih7zOtt-tj0AaCako3hVcGLe1c

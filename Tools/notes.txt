@@ -1,0 +1,483 @@
+================================================================================
+TOOLS & TOOLKIT — NOTES
+================================================================================
+
+================================================================================
+1) LLMs KI LIMITATION
+================================================================================
+
+LLM khud se real-world mein koi action perform nahi kar sakta.
+
+LLM mainly do kaam karta hai:
+  1) Reasoning / Thinking → user ki request samajhna aur decide karna
+                             ki kya karna chahiye
+  2) Text Generation     → user ko response generate karke dena
+
+Example:
+  User: "Mere liye Delhi se Mumbai ki flight book kar do."
+
+  LLM request samajh sakta hai aur decide kar sakta hai ki
+  flight booking karni hai — lekin LLM khud airline website
+  par jaakar booking nahi kar sakta.
+
+LLM directly nahi kar sakta:
+  - Database mein data insert/update
+  - Database se live data fetch
+  - Weather ka current data jaanna
+  - Email send
+  - Flight/train ticket book
+  - Kisi API ko directly execute
+
+Simple way mein:
+  LLM = Brain
+
+  Sirf brain hone se real-world kaam nahi hota.
+  Uske liye external capabilities ki zarurat hoti hai.
+
+
+================================================================================
+2) TOOLS KYA HOTE HAIN?
+================================================================================
+
+Tools woh external functions / capabilities hain jo LLM ko
+real-world mein action perform karne ki ability dete hain.
+
+Simple language mein:
+  Tools LLM ke "hands and legs" ki tarah kaam karte hain.
+
+LLM khud action perform nahi karta —
+balki available tool ko call karta hai.
+
+Example:
+  Agar database se user ka data nikalna hai, to Python function:
+
+    def get_user(email):
+        # database se user ka data fetch karega
+        return user_data
+
+  Ye function ek tool ban sakta hai.
+
+  User: "Mujhe Deep ka data batao."
+
+  LLM decide karega:
+    "Mujhe database se data fetch karna padega."
+
+  Phir woh get_user() tool ko call karega.
+
+
+================================================================================
+3) TOOL ACTUALLY HOTA KYA HAI?
+================================================================================
+
+LangChain mein ek tool basically ek function hota hai
+jise LLM call kar sakta hai.
+
+Example:
+
+  def add(a: int, b: int) -> int:
+      return a + b
+
+  Is function ko tool bana sakte hain.
+  Ab LLM ke paas capability aa gayi: add(a, b)
+
+  User: "25 + 35 kitna hai?"
+
+  Flow:
+    LLM
+     ↓
+    add(25, 35)
+     ↓
+    60
+
+  Tool ne actual calculation perform ki
+  aur result LLM ko return kar diya.
+
+
+================================================================================
+4) LLM KHUD TOOL KO KYUN CALL KARTA HAI?
+================================================================================
+
+Example tool:
+  Name:        get_weather
+  Description: Given a city name, returns the current weather.
+  Input:       city
+
+User: "Aaj Delhi ka weather kaisa hai?"
+
+LLM request samjhega aur available tools dekhega.
+LLM reason karega:
+  - User wants current weather
+  - Current weather mere training data mein available nahi hai
+  - Mere paas get_weather tool available hai
+  - Isliye mujhe get_weather tool call karna chahiye
+
+Phir LLM tool call generate karega:
+  get_weather("Delhi")
+
+Tool actual weather service / API se data fetch karega
+aur result return karega.
+
+Phir LLM us result ko user-friendly response mein convert karega.
+
+
+================================================================================
+5) AGENT KYA HOTA HAI?
+================================================================================
+
+AI Agent = LLM + Tools + Decision Making
+
+Simple definition:
+  AI Agent ek aisa system hai jo LLM ki reasoning capability
+  aur tools ki action-taking capability ko combine karta hai.
+
+  LLM   → agent ka brain
+  Tools → agent ke hands and legs
+
+Agent decide karta hai:
+  "Mujhe kaunsa tool use karna hai?"
+
+Aur tool actual action perform karta hai.
+
+
+================================================================================
+TYPES OF TOOLS IN LANGCHAIN
+================================================================================
+
+LangChain mein broadly 2 categories:
+
+  1) Built-in Tools
+  2) Custom Tools
+
+
+================================================================================
+6) BUILT-IN TOOLS
+================================================================================
+
+Built-in Tools woh tools hain jo LangChain ya uske ecosystem mein
+pehle se available / readymade hote hain.
+
+Matlab har basic functionality ke liye khud se Python function
+likhne ki zarurat nahi.
+
+Existing tool ko apne application mein use kar sakte ho.
+
+Example:
+  Internet par search karna ho → DuckDuckGo Search already available.
+
+Common built-in tools:
+  1) DuckDuckGo Search → web search
+  2) Wikipedia Query   → Wikipedia se information retrieve
+
+
+================================================================================
+7) CUSTOM TOOLS
+================================================================================
+
+Kab zarurat padti hai?
+  Jab specific business requirement ho.
+
+Example:
+  Company ke liye AI assistant bana rahe ho.
+  Company ka apna employee database hai.
+
+  User: "Deep ka employee ID kya hai?"
+
+  LangChain ka koi generic built-in tool directly
+  company ke private database ko nahi jaanta.
+
+  Is situation mein Custom Tool banana padega.
+
+Custom Tool kya hai?
+  Woh tool jo hum apne specific use-case ke according
+  khud create karte hain.
+
+  Usually ek Python function likhte hain jo required task
+  perform karta hai, phir us function ko LangChain tool
+  ke roop mein expose kar dete hain.
+
+Example:
+
+  def get_employee_details(employee_name):
+      # company database se employee details fetch karo
+      return employee_details
+
+  Ab ye function custom tool ban sakta hai.
+  LLM ise zarurat ke according call kar sakta hai.
+
+
+================================================================================
+CUSTOM TOOLS BANANE KE METHODS
+================================================================================
+
+LangChain mein mainly 3 approaches:
+
+  1) @tool Decorator
+  2) Structured Tool + Pydantic
+  3) BaseTool Class
+
+Difficulty / customization order:
+  @tool                      → simple and easy
+  Structured Tool + Pydantic → strict input validation
+  BaseTool                   → advanced & highly customizable
+
+
+================================================================================
+8) METHOD 1 — @tool DECORATOR
+================================================================================
+
+Custom Tool banane ka sabse simple aur commonly used method.
+
+Normal Python function ke upar @tool decorator laga kar
+us function ko LangChain Tool bana sakte ho.
+
+Example:
+
+  from langchain_core.tools import tool
+
+  @tool
+  def add(a: int, b: int) -> int:
+      """Add two numbers together."""
+      return a + b
+
+Break-down:
+
+A) @tool
+  Python function ko LangChain Tool mein convert karta hai.
+
+B) Function
+  def add(a: int, b: int) → int
+  Actual kaam yahi karega.
+
+C) Type Hinting (params)
+  a: int, b: int → integers hone chahiye
+  → int          → function integer return karega
+
+  Type hints LLM ke liye bhi useful hain —
+  tool ka expected input/output structure clear hota hai.
+
+D) Docstring
+  """Add two numbers together."""
+
+  Bahut important.
+  Docstring tool ka description provide karti hai,
+  jisse LLM ko samajhne mein help milti hai ki tool
+  kya karta hai aur kab use karna hai.
+
+Example:
+
+  @tool
+  def get_weather(city: str) → str:
+      """Get the current weather of a city."""
+      return ...
+
+  LLM ko description se pata chalega:
+    get_weather tool city ka current weather provide karta hai.
+
+Simple yaad rakho:
+  Normal Python Function
+          +
+      @tool decorator
+          ↓
+  LangChain Tool
+
+Beginner tip:
+  Agar simple Custom Tool banana hai,
+  to sabse pehle @tool approach seekho.
+
+
+--------------------------------------------------------------------------------
+Important: LLM ko actual Python function nahi milta
+--------------------------------------------------------------------------------
+
+Tool calling ke time LLM ko hamara actual Python function
+directly nahi diya jaata.
+
+Example function:
+
+  def multiply(a: int, b: int) → int:
+      return a * b
+
+LLM ko directly ye Python function execute karne ke liye
+nahi bheja jaata.
+
+Instead, tool ki information ek structured schema ke form
+mein LLM ko provide ki jaati hai.
+
+Schema mein generally:
+  - Tool Name
+  - Tool Description
+  - Input Parameters
+  - Parameter Types
+  - Required Parameters
+  - etc.
+
+Conceptually schema kuch aisa dikhta hai:
+
+  {
+    "name": "multiply",
+    "description": "Multiply two numbers",
+    "parameters": {
+      "a": { "type": "integer", "description": "" },
+      "b": { "type": "integer", "description": "" }
+    }
+  }
+
+Short:
+  LLM ko actual Python function nahi diya jaata.
+  LLM ko tool ki structured information / schema di jaati hai,
+  jiske basis par LLM tool call generate karta hai,
+  aur application / framework actual tool ko execute karta hai.
+
+Schema dekhne ke liye (@tool se banaya ho to):
+
+  print(multiply.args_schema.model_json_schema())
+
+  Ye method tool ke input schema ki JSON representation dikhayega.
+
+
+================================================================================
+9) METHOD 2 — STRUCTURED TOOL + PYDANTIC
+================================================================================
+
+Kab use karein?
+  Jab tool thoda complex ho, multiple inputs hon,
+  aur inputs ko strictly validate karna ho.
+
+Yahan pehle define karte hain ki tool ko exactly
+kis type ka input chahiye.
+
+Example: flight search tool
+  Inputs: source, destination, date, passengers
+
+Pydantic model se schema:
+
+  from pydantic import BaseModel
+
+  class FlightInput(BaseModel):
+      source: str
+      destination: str
+      passengers: int
+
+Matlab clearly define:
+  source      → string
+  destination → string
+  passengers  → integer
+
+Pydantic ka role:
+  Input ko defined schema ke according validate karna.
+
+  passengers = 3        → valid
+  invalid / wrong type  → Pydantic validation help karega
+
+Structured Tool kab useful hai?
+  - Multiple inputs hon
+  - Input structure important ho
+  - Strict validation chahiye
+  - Production-level application bana rahe ho
+
+Simple comparison:
+  Simple Tool                  → @tool
+  Complex / Structured Input   → Structured Tool + Pydantic
+
+
+================================================================================
+10) METHOD 3 — BASETOOL CLASS
+================================================================================
+
+Custom Tool banane ka advanced approach.
+
+Is method mein LangChain ki BaseTool class ko inherit karte ho,
+apni tool class banate ho, aur usi mein tool ka naam, logic,
+description etc. define karte ho.
+
+Concept:
+
+  from langchain_core.tools import BaseTool
+
+  class MyTool(BaseTool):
+      # tool ka naam
+      name: str = "multiply"
+
+      # tool ka description
+      description: str = "Multiply two numbers"
+
+      # tool ko kaisa input chahiye
+      args_schema: Type[BaseModel] = MultiplyInput
+
+      # actual tool logic
+      def _run(self, a: int, b: int) → int:
+          return a * b
+
+BaseTool kyun use karein?
+  Jab tool ke behavior par deep control aur customization chahiye.
+  BaseTool class ke andar tools banane ke liye required cheezein
+  defined hain — BaseTool ko inherit karna mandatory hai
+  is method se tool banane ke liye.
+
+Useful jab chahiye:
+  - Custom execution logic
+  - Complex input/output handling
+  - Custom validation
+  - Synchronous execution
+  - Asynchronous (async) execution
+  - Tool ke behavior ko extensively customize karna
+
+Isliye @tool ke comparison mein zyada advanced hai.
+
+BaseTool vs @tool:
+  BaseTool → LangChain ki base class se tool class banana.
+             Extreme customization available.
+  @tool    → simple function ko tool banane ka easy tarika.
+
+
+================================================================================
+TEENO METHODS KA COMPARISON
+================================================================================
+
+Method                        Difficulty    Best For
+----------------------------  ------------  ---------------------------
+@tool                         Easy          Simple Custom Tools
+Structured Tool + Pydantic    Medium        Structured & validated inputs
+BaseTool                      Advanced      Deep customization & async
+
+
+================================================================================
+11) TOOLKITS
+================================================================================
+
+Toolkit kya hai?
+  Related tools ka collection / group —
+  ek particular purpose ya service se related multiple tools.
+
+Example:
+  search_files(), create_file(), delete_file()
+  → ye sab Google Drive se related tools hain
+  → in related tools ko ek group / collection mein
+    organize kiya ja sakta hai
+  → isi concept ko Toolkit kehte hain
+
+Benefits:
+  Organization → related tools ek jagah mil jaate hain
+  Reusability  → toolkit ko different apps / agents mein reuse
+  Management   → multiple related tools manage karna easier
+  Clarity      → pata rehta hai kaunse tools kis service /
+                 use-case se related hain
+
+
+================================================================================
+QUICK DECISION GUIDE
+================================================================================
+
+Simple custom function as tool          → @tool
+Multiple inputs + strict validation     → Structured Tool + Pydantic
+Deep customization / async control      → BaseTool
+Related tools ek service ke around      → Toolkit
+Ready-made search / Wikipedia etc.      → Built-in Tools
+
+
+================================================================================
+RELATED CODE / COLAB
+================================================================================
+
+Saare Tools ke example code notes Google Colab me:
+  https://colab.research.google.com/drive/1M9Tbbc8-CUp0MxmfUe7BuYQulq-UL2SX#scrollTo=5n0PACTZuwyW
